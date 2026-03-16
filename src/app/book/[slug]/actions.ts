@@ -1,6 +1,6 @@
 "use server";
 
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 import { resend, FROM_EMAIL } from "@/lib/resend";
 
 export type BookingResult =
@@ -18,7 +18,7 @@ export async function bookAppointment(data: {
   email: string;
   phone: string;
 }): Promise<BookingResult> {
-  const supabase = createAdminClient();
+  const supabase = await createClient();
 
   // Vérifier que le créneau est toujours disponible
   const { data: conflict } = await supabase

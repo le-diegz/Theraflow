@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 import { BookingClient } from "./BookingClient";
 
 // ─── Slot generation ──────────────────────────────────────────────────────────
@@ -65,7 +65,7 @@ const SPECIALTY_LABELS: Record<string, string> = {
 
 export default async function BookPage({ params }: PageProps) {
   const { slug } = await params;
-  const supabase = createAdminClient();
+  const supabase = await createClient();
 
   // Fetch therapist by slug
   const { data: profile } = await supabase
