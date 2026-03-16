@@ -2,11 +2,20 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
+  // Si les variables Supabase ne sont pas configurées (ex: Vercel sans env vars),
+  // laisser passer la requête — les pages gèrent leur propre auth guard.
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  ) {
+    return NextResponse.next({ request });
+  }
+
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {
       cookies: {
         getAll() {
@@ -26,11 +35,16 @@ export async function middleware(request: NextRequest) {
   );
 
   // IMPORTANT : ne jamais supprimer cet appel — il rafraîchit la session
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch {
+    // Si Supabase est injoignable, laisser passer — les pages gèrent l'auth
+    return supabaseResponse;
+  }
 
-  // Protéger toutes les routes /dashboard, /patients, /agenda, /facturation
+  // Protéger toutes les routes dashboard
   const pathname = request.nextUrl.pathname;
   const isProtected =
     pathname.startsWith("/dashboard") ||
