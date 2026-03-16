@@ -361,7 +361,8 @@ function Step4({
   error?: string;
 }) {
   const [copied, setCopied] = useState(false);
-  const url = `${process.env.NEXT_PUBLIC_APP_URL ?? "https://theraflow-app.vercel.app"}/book/${slug}`;
+  const baseUrl = (process.env.NEXT_PUBLIC_APP_URL ?? "https://theraflow-app.vercel.app").replace(/\/$/, "");
+  const url = `${baseUrl}/book/${slug}`;
 
   async function handleCopy() {
     await navigator.clipboard.writeText(url);
