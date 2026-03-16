@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { resend, FROM_EMAIL } from "@/lib/resend";
+import { getResend, FROM_EMAIL } from "@/lib/resend";
 
 export type BookingResult =
   | { success: true; patientName: string; therapistName: string; date: string; time: string }
@@ -77,8 +77,10 @@ export async function bookAppointment(data: {
   const timeStr = dateObj.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
   const patientFullName = `${data.firstName} ${data.lastName}`;
 
+  const resend = getResend();
+
   // Email au patient
-  await resend.emails.send({
+  await resend?.emails.send({
     from: FROM_EMAIL,
     to: data.email,
     subject: `Votre RDV avec ${data.therapistName} est confirmé`,
@@ -101,7 +103,7 @@ export async function bookAppointment(data: {
   }).catch(() => {});
 
   // Email au thérapeute
-  await resend.emails.send({
+  await resend?.emails.send({
     from: FROM_EMAIL,
     to: data.therapistEmail,
     subject: `Nouvelle réservation de ${patientFullName}`,
