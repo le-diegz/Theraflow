@@ -1,0 +1,194 @@
+@import 'react-big-calendar/lib/css/react-big-calendar.css';
+
+/* ─── Theraflow calendar overrides ─── */
+
+.rbc-calendar {
+  font-family: inherit;
+  background: transparent;
+}
+
+/* Toolbar */
+.rbc-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.rbc-toolbar-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0D1F1A;
+  flex: 1;
+  text-align: center;
+  text-transform: capitalize;
+}
+
+.rbc-btn-group button,
+.rbc-toolbar button {
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #0D1F1A;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  outline: none;
+}
+
+.rbc-btn-group button:hover,
+.rbc-toolbar button:hover {
+  background: #E1F5EE;
+  border-color: #1D9E75;
+  color: #1D9E75;
+}
+
+.rbc-btn-group button.rbc-active,
+.rbc-toolbar button.rbc-active {
+  background: #1D9E75;
+  border-color: #1D9E75;
+  color: #ffffff;
+}
+
+.rbc-btn-group button.rbc-active:hover {
+  background: #0F6E56;
+  border-color: #0F6E56;
+  color: #ffffff;
+}
+
+/* Header des jours */
+.rbc-header {
+  padding: 10px 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #0D1F1A80;
+  background: #F7F5F0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.rbc-header a,
+.rbc-header a:visited {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Grille */
+.rbc-time-view,
+.rbc-month-view {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.rbc-time-header.rbc-overflowing {
+  border-right: 1px solid #e5e7eb;
+}
+
+.rbc-time-content {
+  border-top: 1px solid #e5e7eb;
+}
+
+.rbc-time-gutter .rbc-timeslot-group {
+  border-bottom: none;
+}
+
+.rbc-timeslot-group {
+  border-bottom: 1px solid #f0f0f0;
+  min-height: 40px;
+}
+
+.rbc-time-slot {
+  font-size: 0.7rem;
+  color: #0D1F1A60;
+}
+
+/* Aujourd'hui */
+.rbc-today {
+  background-color: #E1F5EE30;
+}
+
+/* Indicateur heure actuelle */
+.rbc-current-time-indicator {
+  background-color: #1D9E75;
+  height: 2px;
+}
+
+.rbc-current-time-indicator::before {
+  background-color: #1D9E75;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  content: '';
+  position: absolute;
+  left: -4px;
+  top: -3px;
+}
+
+/* Événements */
+.rbc-event {
+  border-radius: 6px !important;
+  font-size: 0.78rem;
+  font-weight: 500;
+  padding: 3px 8px !important;
+  border: none !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+
+.rbc-event:focus,
+.rbc-event.rbc-selected {
+  outline: 2px solid #0F6E56;
+  outline-offset: 1px;
+}
+
+.rbc-event-label {
+  font-size: 0.72rem;
+  font-weight: 400;
+  opacity: 0.85;
+}
+
+/* Sélection de slot */
+.rbc-slot-selection {
+  background: #E1F5EE80;
+  border: 1px dashed #1D9E75;
+  border-radius: 4px;
+}
+
+/* Ligne off-range */
+.rbc-off-range-bg {
+  background: #F7F5F080;
+}
+
+/* Colonne heure */
+.rbc-label {
+  padding: 0 6px;
+  font-size: 0.7rem;
+  color: #0D1F1A50;
+}
+
+/* Mois — cellule jour */
+.rbc-date-cell {
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  color: #0D1F1A80;
+}
+
+.rbc-date-cell.rbc-now {
+  font-weight: 700;
+  color: #1D9E75;
+}
+
+/* Dividers */
+.rbc-day-bg + .rbc-day-bg,
+.rbc-time-column + .rbc-time-column {
+  border-left: 1px solid #f0f0f0;
+}
+
+.rbc-month-row + .rbc-month-row {
+  border-top: 1px solid #f0f0f0;
+}
