@@ -134,17 +134,10 @@ function SidebarContent({
         <Link
           href="/dashboard"
           onClick={onClose}
-          className="flex items-center gap-2.5"
+          className="flex items-center gap-1.5"
         >
-          <div className="w-8 h-8 rounded-lg bg-teal-400 flex items-center justify-center shrink-0">
-            <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
-              <path
-                d="M9 2C5.13 2 2 5.13 2 9s3.13 7 7 7 7-3.13 7-7-3.13-7-7-7zm1 10H8V8h2v4zm0-6H8V4h2v2z"
-                fill="white"
-              />
-            </svg>
-          </div>
-          <span className="font-semibold text-ink">Theraflow</span>
+          <span className="font-serif text-xl text-ink tracking-tight">Theraflow</span>
+          <span className="w-1.5 h-1.5 rounded-full bg-teal-400 mb-0.5" />
         </Link>
         {onClose && (
           <button
@@ -166,12 +159,15 @@ function SidebarContent({
               key={href}
               href={href}
               onClick={onClose}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+              className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
                 isActive
                   ? "bg-teal-50 text-teal-600"
                   : "text-ink/55 hover:text-ink hover:bg-teal-50/60"
               }`}
             >
+              {isActive && (
+                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-teal-400 rounded-full -ml-3" />
+              )}
               <span className={isActive ? "text-teal-500" : ""}>
                 <Icon />
               </span>
@@ -222,16 +218,9 @@ export function Sidebar(props: SidebarProps) {
 
       {/* ── Mobile : barre haute fixe ── */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-30 h-14 bg-white border-b border-border flex items-center justify-between px-4">
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-teal-400 flex items-center justify-center">
-            <svg width="14" height="14" viewBox="0 0 18 18" fill="none">
-              <path
-                d="M9 2C5.13 2 2 5.13 2 9s3.13 7 7 7 7-3.13 7-7-3.13-7-7-7zm1 10H8V8h2v4zm0-6H8V4h2v2z"
-                fill="white"
-              />
-            </svg>
-          </div>
-          <span className="font-semibold text-ink">Theraflow</span>
+        <Link href="/dashboard" className="flex items-center gap-1.5">
+          <span className="font-serif text-xl text-ink">Theraflow</span>
+          <span className="w-1.5 h-1.5 rounded-full bg-teal-400 mb-0.5" />
         </Link>
         <button
           onClick={() => setMobileOpen(true)}

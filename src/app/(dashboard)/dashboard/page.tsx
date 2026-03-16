@@ -164,7 +164,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       {showBanner && <UpgradeBanner />}
       {/* En-tête */}
       <div>
-        <h1 className="text-2xl font-serif text-ink">
+        <h1 className="font-serif text-3xl text-ink">
           Bonjour, {firstName} 👋
         </h1>
         <p className="text-ink/50 text-sm mt-1 capitalize">
@@ -178,6 +178,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           label="RDV aujourd'hui"
           value={todayCount?.toString() ?? "—"}
           sub={todayCount === 0 ? "Aucun RDV prévu" : `${todayCount} séance${(todayCount ?? 0) > 1 ? "s" : ""}`}
+          iconBg="bg-teal-50"
           icon={
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1D9E75" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
@@ -185,11 +186,12 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           }
         />
         <MetricCard
-          label="Patients"
+          label="Patients actifs"
           value={patientCount?.toString() ?? "—"}
           sub="patients enregistrés"
+          iconBg="bg-purple-50"
           icon={
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1D9E75" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
             </svg>
           }
@@ -198,26 +200,52 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           label="Revenus ce mois"
           value={monthRevenue > 0 ? formatEuros(monthRevenue) : "—"}
           sub="factures payées"
+          iconBg="bg-green-50"
           icon={
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1D9E75" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
             </svg>
           }
         />
         <MetricCard
           label="Prochain RDV"
-          value={
-            nextApptData
-              ? formatTime(nextApptData.start_time)
-              : "—"
-          }
+          value={nextApptData ? formatTime(nextApptData.start_time) : "—"}
           sub={nextPatientName ?? "Aucun RDV à venir"}
+          iconBg="bg-amber-50"
           icon={
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1D9E75" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
             </svg>
           }
         />
+      </div>
+
+      {/* Accès rapides */}
+      <div className="grid grid-cols-3 gap-3">
+        <Link href="/agenda" className="bg-white rounded-2xl border border-border p-4 flex items-center gap-3 hover:border-teal-400/40 hover:bg-teal-50/30 transition-all group">
+          <div className="w-9 h-9 rounded-xl bg-teal-50 flex items-center justify-center shrink-0 group-hover:bg-teal-100 transition-colors">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1D9E75" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /><line x1="12" y1="14" x2="12" y2="18" /><line x1="10" y1="16" x2="14" y2="16" />
+            </svg>
+          </div>
+          <span className="text-sm font-medium text-ink">Nouveau RDV</span>
+        </Link>
+        <Link href="/patients" className="bg-white rounded-2xl border border-border p-4 flex items-center gap-3 hover:border-purple-400/40 hover:bg-purple-50/30 transition-all group">
+          <div className="w-9 h-9 rounded-xl bg-purple-50 flex items-center justify-center shrink-0 group-hover:bg-purple-100 transition-colors">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><line x1="19" y1="8" x2="19" y2="14" /><line x1="22" y1="11" x2="16" y2="11" />
+            </svg>
+          </div>
+          <span className="text-sm font-medium text-ink">Nouveau patient</span>
+        </Link>
+        <Link href="/facturation" className="bg-white rounded-2xl border border-border p-4 flex items-center gap-3 hover:border-green-400/40 hover:bg-green-50/30 transition-all group">
+          <div className="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center shrink-0 group-hover:bg-green-100 transition-colors">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="12" y1="18" x2="12" y2="12" /><line x1="9" y1="15" x2="15" y2="15" />
+            </svg>
+          </div>
+          <span className="text-sm font-medium text-ink">Nouvelle facture</span>
+        </Link>
       </div>
 
       {/* RDV du jour */}
@@ -283,17 +311,19 @@ function MetricCard({
   value,
   sub,
   icon,
+  iconBg = "bg-teal-50",
 }: {
   label: string;
   value: string;
   sub: string;
   icon: React.ReactNode;
+  iconBg?: string;
 }) {
   return (
     <div className="bg-white rounded-2xl border border-border p-5">
       <div className="flex items-center justify-between mb-3">
         <p className="text-xs font-medium text-ink/50 uppercase tracking-wide">{label}</p>
-        <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center">
+        <div className={`w-8 h-8 rounded-lg ${iconBg} flex items-center justify-center`}>
           {icon}
         </div>
       </div>

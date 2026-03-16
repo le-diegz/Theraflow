@@ -18,7 +18,8 @@ export default async function DashboardLayout({
 
   let { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, specialty")
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .select("full_name, specialty, onboarding_completed" as any)
     .eq("id", user.id)
     .single();
 
@@ -35,7 +36,8 @@ export default async function DashboardLayout({
         },
         { onConflict: "id", ignoreDuplicates: true }
       )
-      .select("full_name, specialty")
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .select("full_name, specialty, onboarding_completed" as any)
       .single();
 
     if (error) {
@@ -43,6 +45,12 @@ export default async function DashboardLayout({
     } else {
       profile = created;
     }
+  }
+
+  // Redirect to onboarding if not completed
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if (profile && !(profile as any).onboarding_completed) {
+    redirect("/onboarding");
   }
 
   const p = profile as Pick<Tables<"profiles">, "full_name" | "specialty"> | null;
