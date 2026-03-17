@@ -44,7 +44,7 @@ export async function GET() {
 
   const rows = (patients ?? []).map((p) => {
     const appts = (p.appointments ?? []).filter(
-      (a: { status: string }) => a.status !== "cancelled"
+      (a: { status: string | null }) => a.status !== "cancelled"
     );
     const sortedDates = appts
       .map((a: { start_time: string }) => a.start_time)

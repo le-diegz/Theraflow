@@ -163,7 +163,8 @@ export async function GET(request: NextRequest) {
       cancelled: "Annulé",
       no_show: "Absent",
     };
-    return [date, name, `${duration} min`, amount, statusMap[a.status] ?? a.status];
+    const status = a.status ?? "confirmed";
+    return [date, name, `${duration} min`, amount, statusMap[status] ?? status];
   });
 
   autoTable(doc, {

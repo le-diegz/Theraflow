@@ -40,6 +40,7 @@ export async function GET(request: NextRequest) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const name = patient ? `${(patient as any).first_name} ${(patient as any).last_name}` : "Patient";
 
+    if (!inv.therapist_id) continue;
     await createNotification(
       inv.therapist_id,
       "invoice_overdue",
