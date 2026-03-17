@@ -4,6 +4,7 @@ import {
   ParametresClient,
   type ProfileData,
   type SubscriptionData,
+  type SmsSettings,
 } from "./ParametresClient";
 
 export default async function ParametresPage() {
@@ -16,9 +17,10 @@ export default async function ParametresPage() {
   if (!user) redirect("/login");
 
   const [{ data: profile }, { data: rawSub }] = await Promise.all([
-    supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (supabase as any)
       .from("profiles")
-      .select("full_name, specialty, phone")
+      .select("full_name, specialty, phone, sms_reminders_enabled, sms_reminder_delay")
       .eq("id", user.id)
       .single(),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -36,6 +38,11 @@ export default async function ParametresPage() {
     email: user.email ?? "",
   };
 
+  const smsSettings: SmsSettings = {
+    enabled: profile?.sms_reminders_enabled ?? true,
+    delay: profile?.sms_reminder_delay ?? 24,
+  };
+
   const subscription: SubscriptionData | null = rawSub
     ? {
         plan: (rawSub.plan as "free" | "pro") ?? "free",
@@ -45,5 +52,11 @@ export default async function ParametresPage() {
       }
     : null;
 
-  return <ParametresClient profile={profileData} subscription={subscription} />;
+  return (
+    <ParametresClient
+      profile={profileData}
+      subscription={subscription}
+      smsSettings={smsSettings}
+    />
+  );
 }

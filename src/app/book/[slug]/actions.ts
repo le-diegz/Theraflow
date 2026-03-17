@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { getResend, FROM_EMAIL } from "@/lib/resend";
+import { createNotification } from "@/lib/notifications";
 
 export type BookingResult =
   | { success: true; patientName: string; therapistName: string; date: string; time: string }
@@ -123,6 +124,15 @@ export async function bookAppointment(data: {
       </div>
     `,
   }).catch(() => {});
+
+  // Notification in-app pour le thérapeute
+  await createNotification(
+    data.therapistId,
+    "new_booking",
+    "Nouvelle réservation",
+    `${patientFullName} a réservé un RDV le ${dateStr} à ${timeStr}.`,
+    "/agenda"
+  );
 
   return {
     success: true,

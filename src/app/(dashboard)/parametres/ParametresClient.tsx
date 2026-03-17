@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { updateProfile, type ProfileActionState } from "./actions";
+import { updateProfile, updateSmsSettings, type ProfileActionState, type SmsActionState } from "./actions";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -19,9 +19,15 @@ export type SubscriptionData = {
   stripe_customer_id: string | null;
 };
 
+export type SmsSettings = {
+  enabled: boolean;
+  delay: number; // heures avant RDV
+};
+
 interface Props {
   profile: ProfileData;
   subscription: SubscriptionData | null;
+  smsSettings: SmsSettings;
 }
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
@@ -42,9 +48,15 @@ const PRO_FEATURES = [
   "Toutes les futures fonctionnalités",
 ];
 
+const SMS_DELAY_OPTIONS = [
+  { value: 1, label: "1h avant" },
+  { value: 24, label: "24h avant" },
+  { value: 48, label: "48h avant" },
+];
+
 // ─── Composant principal ──────────────────────────────────────────────────────
 
-export function ParametresClient({ profile, subscription }: Props) {
+export function ParametresClient({ profile, subscription, smsSettings }: Props) {
   const plan = subscription?.plan ?? "free";
   const isPro = plan === "pro";
 
@@ -56,6 +68,8 @@ export function ParametresClient({ profile, subscription }: Props) {
       </div>
 
       <ProfileSection profile={profile} />
+      <SmsSection settings={smsSettings} isPro={isPro} />
+      <ExportSection />
       <SubscriptionSection isPro={isPro} subscription={subscription} />
     </div>
   );
@@ -85,7 +99,6 @@ function ProfileSection({ profile }: { profile: ProfileData }) {
       )}
 
       <form action={action} className="space-y-4">
-        {/* Nom complet */}
         <div>
           <label className="block text-sm font-medium text-ink mb-1.5">Nom complet</label>
           <input
@@ -97,7 +110,6 @@ function ProfileSection({ profile }: { profile: ProfileData }) {
           />
         </div>
 
-        {/* Spécialité */}
         <div>
           <label className="block text-sm font-medium text-ink mb-1.5">Spécialité</label>
           <select
@@ -113,7 +125,6 @@ function ProfileSection({ profile }: { profile: ProfileData }) {
           </select>
         </div>
 
-        {/* Téléphone */}
         <div>
           <label className="block text-sm font-medium text-ink mb-1.5">Téléphone</label>
           <input
@@ -125,11 +136,9 @@ function ProfileSection({ profile }: { profile: ProfileData }) {
           />
         </div>
 
-        {/* Email (lecture seule) */}
         <div>
           <label className="block text-sm font-medium text-ink mb-1.5">
-            Email{" "}
-            <span className="text-ink/30 font-normal">(non modifiable)</span>
+            Email <span className="text-ink/30 font-normal">(non modifiable)</span>
           </label>
           <input
             type="email"
@@ -155,6 +164,250 @@ function ProfileSection({ profile }: { profile: ProfileData }) {
           </button>
         </div>
       </form>
+    </section>
+  );
+}
+
+// ─── Section Rappels SMS ──────────────────────────────────────────────────────
+
+function SmsSection({ settings, isPro }: { settings: SmsSettings; isPro: boolean }) {
+  const [enabled, setEnabled] = useState(settings.enabled);
+  const [delay, setDelay] = useState(settings.delay);
+  const [state, action, pending] = useActionState<SmsActionState, FormData>(
+    updateSmsSettings,
+    null
+  );
+
+  // Message SMS preview
+  const previewDelay = SMS_DELAY_OPTIONS.find((o) => o.value === delay)?.label ?? "24h avant";
+  const preview = `Bonjour [Prénom], rappel de votre RDV avec [Thérapeute] ${
+    delay === 1 ? "dans 1 heure" : delay === 24 ? "demain" : "dans 2 jours"
+  } à [heure]. Pour annuler : [lien]\n- Theraflow`;
+
+  return (
+    <section className="bg-white rounded-2xl border border-border p-6">
+      <div className="flex items-center gap-3 mb-5">
+        <div className="w-8 h-8 rounded-full bg-teal-50 flex items-center justify-center shrink-0">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1D9E75" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.63 3.18 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
+          </svg>
+        </div>
+        <h2 className="font-semibold text-ink">Rappels SMS</h2>
+        {!isPro && (
+          <span className="ml-auto text-xs bg-amber-50 text-amber-600 border border-amber-200 px-2.5 py-1 rounded-full font-medium">
+            Pro uniquement
+          </span>
+        )}
+      </div>
+
+      {!isPro ? (
+        <p className="text-sm text-ink/50">
+          Passez en plan Pro pour activer les rappels SMS automatiques à vos patients.
+        </p>
+      ) : (
+        <>
+          {state?.error && (
+            <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+              {state.error}
+            </div>
+          )}
+          {state?.success && (
+            <div className="mb-4 px-4 py-3 bg-teal-50 border border-teal-200 rounded-xl text-sm text-teal-700">
+              Paramètres SMS sauvegardés.
+            </div>
+          )}
+
+          <form action={action} className="space-y-5">
+            {/* Toggle */}
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-ink">Activer les rappels SMS</p>
+                <p className="text-xs text-ink/40 mt-0.5">Envoie un SMS automatique aux patients avant leur RDV</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="sms_enabled"
+                  checked={enabled}
+                  onChange={(e) => setEnabled(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-ink/20 peer-checked:bg-teal-400 rounded-full transition-colors peer-focus:ring-2 peer-focus:ring-teal-400/30" />
+                <div className="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform peer-checked:translate-x-5" />
+              </label>
+            </div>
+
+            {/* Délai */}
+            <div>
+              <label className="block text-sm font-medium text-ink mb-2">Délai avant le RDV</label>
+              <div className="flex gap-2">
+                {SMS_DELAY_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setDelay(opt.value)}
+                    className={`px-4 py-2 rounded-xl text-sm font-medium border transition-colors ${
+                      delay === opt.value
+                        ? "bg-teal-400 text-white border-teal-400"
+                        : "border-border text-ink/60 hover:border-teal-400"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+                <input type="hidden" name="sms_delay" value={delay} />
+              </div>
+            </div>
+
+            {/* Prévisualisation */}
+            <div>
+              <p className="text-xs font-medium text-ink/50 mb-2 uppercase tracking-wide">
+                Aperçu du message ({previewDelay})
+              </p>
+              <div className="bg-ink/[0.03] rounded-xl px-4 py-3 text-sm text-ink/70 whitespace-pre-line leading-relaxed">
+                {preview}
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={pending}
+              className="px-6 py-2.5 bg-teal-400 hover:bg-teal-600 disabled:opacity-60 text-white text-sm font-medium rounded-xl transition-colors flex items-center gap-2"
+            >
+              {pending && (
+                <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+              )}
+              {pending ? "Enregistrement…" : "Sauvegarder"}
+            </button>
+          </form>
+        </>
+      )}
+    </section>
+  );
+}
+
+// ─── Section Export ───────────────────────────────────────────────────────────
+
+function ExportSection() {
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  });
+  const [loadingPatients, setLoadingPatients] = useState(false);
+  const [loadingMonthly, setLoadingMonthly] = useState(false);
+  const [loadingInvoices, setLoadingInvoices] = useState(false);
+
+  async function downloadFile(url: string, setLoading: (v: boolean) => void) {
+    setLoading(true);
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Erreur serveur");
+      const blob = await res.blob();
+      const href = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = href;
+      const cd = res.headers.get("content-disposition") ?? "";
+      const match = cd.match(/filename="([^"]+)"/);
+      a.download = match?.[1] ?? "export";
+      a.click();
+      URL.revokeObjectURL(href);
+    } catch {
+      alert("Une erreur est survenue lors du téléchargement.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <section className="bg-white rounded-2xl border border-border p-6">
+      <div className="flex items-center gap-3 mb-5">
+        <div className="w-8 h-8 rounded-full bg-purple-50 flex items-center justify-center shrink-0">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+        </div>
+        <h2 className="font-semibold text-ink">Export de données</h2>
+      </div>
+
+      <div className="space-y-4">
+        {/* Export patients CSV */}
+        <div className="flex items-center justify-between p-4 rounded-xl bg-ink/[0.02] border border-border">
+          <div>
+            <p className="text-sm font-medium text-ink">Mes patients</p>
+            <p className="text-xs text-ink/40 mt-0.5">Prénom, nom, email, téléphone, historique</p>
+          </div>
+          <button
+            onClick={() => downloadFile("/api/export/patients", setLoadingPatients)}
+            disabled={loadingPatients}
+            className="px-4 py-2 rounded-xl bg-white border border-border text-sm font-medium text-ink/70 hover:text-ink hover:border-teal-400 disabled:opacity-50 transition-colors flex items-center gap-2"
+          >
+            {loadingPatients ? (
+              <svg className="animate-spin w-3.5 h-3.5" viewBox="0 0 24 24" fill="none">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+            ) : null}
+            CSV
+          </button>
+        </div>
+
+        {/* Récap mensuel PDF */}
+        <div className="flex items-center justify-between p-4 rounded-xl bg-ink/[0.02] border border-border gap-4">
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-ink">Récapitulatif mensuel</p>
+            <p className="text-xs text-ink/40 mt-0.5">Séances, revenus, patients — format PDF</p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <input
+              type="month"
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              className="px-3 py-2 rounded-xl border border-border bg-white text-sm text-ink focus:outline-none focus:ring-2 focus:ring-teal-400/30 focus:border-teal-400"
+            />
+            <button
+              onClick={() =>
+                downloadFile(`/api/export/monthly?month=${selectedMonth}`, setLoadingMonthly)
+              }
+              disabled={loadingMonthly}
+              className="px-4 py-2 rounded-xl bg-white border border-border text-sm font-medium text-ink/70 hover:text-ink hover:border-teal-400 disabled:opacity-50 transition-colors flex items-center gap-2"
+            >
+              {loadingMonthly ? (
+                <svg className="animate-spin w-3.5 h-3.5" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+              ) : null}
+              PDF
+            </button>
+          </div>
+        </div>
+
+        {/* Export factures CSV */}
+        <div className="flex items-center justify-between p-4 rounded-xl bg-ink/[0.02] border border-border">
+          <div>
+            <p className="text-sm font-medium text-ink">Toutes mes factures</p>
+            <p className="text-xs text-ink/40 mt-0.5">Numéro, montant, statut, date</p>
+          </div>
+          <button
+            onClick={() => downloadFile("/api/export/invoices", setLoadingInvoices)}
+            disabled={loadingInvoices}
+            className="px-4 py-2 rounded-xl bg-white border border-border text-sm font-medium text-ink/70 hover:text-ink hover:border-teal-400 disabled:opacity-50 transition-colors flex items-center gap-2"
+          >
+            {loadingInvoices ? (
+              <svg className="animate-spin w-3.5 h-3.5" viewBox="0 0 24 24" fill="none">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+            ) : null}
+            CSV
+          </button>
+        </div>
+      </div>
     </section>
   );
 }
@@ -237,7 +490,6 @@ function SubscriptionSection({
       )}
 
       {isPro ? (
-        // ── Plan Pro actif ──────────────────────────────────────────────────
         <div className="space-y-4">
           <div className="flex items-center gap-3 p-4 bg-teal-50 rounded-xl border border-teal-100">
             <div className="w-9 h-9 rounded-full bg-teal-400/20 flex items-center justify-center shrink-0">
@@ -264,7 +516,6 @@ function SubscriptionSection({
           </button>
         </div>
       ) : (
-        // ── Plan Gratuit → carte upgrade ────────────────────────────────────
         <div className="space-y-5">
           <div className="p-5 rounded-xl bg-gradient-to-br from-teal-50 to-teal-50/30 border border-teal-100">
             <div className="flex items-start justify-between gap-4 mb-4">

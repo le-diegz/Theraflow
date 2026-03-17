@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Sidebar } from "@/components/dashboard/Sidebar";
+import { NotificationBell } from "@/components/dashboard/NotificationBell";
 import type { Tables } from "@/types/database.types";
 
 export default async function DashboardLayout({
@@ -67,6 +68,12 @@ export default async function DashboardLayout({
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Espaceur pour la barre mobile */}
         <div className="h-14 md:hidden shrink-0" />
+
+        {/* Top bar desktop avec NotificationBell */}
+        <div className="hidden md:flex h-14 shrink-0 border-b border-border bg-white items-center justify-end px-6">
+          <NotificationBell userId={user.id} />
+        </div>
+
         <main className="flex-1 overflow-y-auto">
           {children}
         </main>
